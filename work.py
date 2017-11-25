@@ -13,12 +13,14 @@ import json
 already_know = {}
 
 def load():
+    global already_know
     try:
         f = open('data', 'r')
         already_know = json.loads(f.read())
         f.close()
     except:
         pass
+    # print(already_know)
     
 def dump():
     f = open('data', 'w')
@@ -48,6 +50,7 @@ class BaseParser(HTMLParser):
                     
 def parse_train(url):
     if url in already_know:
+        # print('here')
         return already_know[url]
     parser = BaseParser()
     parser.tagstack = []
@@ -58,8 +61,12 @@ def parse_train(url):
     ans = list()
     for elem in parser.s:
         if elem[0] in digits:
-            dt = datetime.strptime(elem, '%I:%M')
-            ans[-1].append(dt.hour * 60 + dt.minute)
+            #print(elem)
+            try:
+                dt = datetime.strptime(elem, '%H:%M')
+                ans[-1].append(dt.hour * 60 + dt.minute)
+            except:
+                ans.pop()
         elif elem[0] == '-':
             ans.pop()
         else:
@@ -71,7 +78,9 @@ def parse_train(url):
             answer2.append(rail[elem[0]])
             answer1.append(elem[1])
     parser.close()
-    already_know[url] = (answer1, answer2)
+    # print((answer1, answer2))
+    if (answer1, answer2) != ([], []):
+        already_know[url] = (answer1, answer2)
     return (answer1, answer2)
 
 def plot_train(url):
@@ -101,6 +110,7 @@ mp.feed(urlopen('https://www.tutu.ru/station.php?nnst=35805&list=d5').read().dec
 mp.s.pop()
 i = 0
 j = 0
+
 #sleep(10)
 for elem in mp.s:
     try:
@@ -108,8 +118,9 @@ for elem in mp.s:
     except:
         j += 1
     i += 1
-    print(i)
-print(j, 'proebov')
-show()
+    if i % 10 == 0:
+        print(i // 10)
 
+print(j, 'exceptions')
 dump()
+show()
