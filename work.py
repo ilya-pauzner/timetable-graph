@@ -6,7 +6,24 @@ from urllib import *
 from string import *
 from datetime import *
 from time import *
+
+import json
 # import os
+
+already_know = {}
+
+def load():
+    try:
+        f = open('data', 'r')
+        already_know = json.loads(f.read())
+        f.close()
+    except:
+        pass
+    
+def dump():
+    f = open('data', 'w')
+    f.write(json.dumps(already_know))
+    f.close()
 
 rail  = {'Дмитровская': 4.4, 'Гражданская': 5.9, 'КрасныйБалтиец': 8.2, 'Ленинградская': 9.9, 'Покровское-Стрешнево': 11.2, 'Тушино': 14.9, 'Трикотажная': 17.8, 'Павшино': 22.3, 'Красногорская': 24.8, 'Опалиха': 29.3}
 
@@ -30,11 +47,13 @@ class BaseParser(HTMLParser):
                     self.s.append(d1)
                     
 def parse_train(url):
+    if url in already_know:
+        return already_know[url]
     parser = BaseParser()
     parser.tagstack = []
     parser.attrstack = []
     parser.s = []
-    sleep(1)
+    sleep(2)
     parser.feed(urlopen(url).read().decode('utf-8'))
     ans = list()
     for elem in parser.s:
@@ -52,6 +71,7 @@ def parse_train(url):
             answer2.append(rail[elem[0]])
             answer1.append(elem[1])
     parser.close()
+    already_know[url] = (answer1, answer2)
     return (answer1, answer2)
 
 def plot_train(url):
@@ -71,6 +91,7 @@ class MetaParser(HTMLParser):
         if '→' in data:
             self.s.append(['https://tutu.ru' + self.attrstack[-1][0][1]])
 
+load()
 
 mp = MetaParser()
 mp.tagstack = []
@@ -80,8 +101,7 @@ mp.feed(urlopen('https://www.tutu.ru/station.php?nnst=35805&list=d5').read().dec
 mp.s.pop()
 i = 0
 j = 0
-print(mp.s)
-sleep(10)
+#sleep(10)
 for elem in mp.s:
     try:
         plot_train(elem[0])
@@ -89,14 +109,7 @@ for elem in mp.s:
         j += 1
     i += 1
     print(i)
-print(j)
+print(j, 'proebov')
 show()
-#plot_train('https://www.tutu.ru/view.php?np=947c0499')
-#plot_train('https://www.tutu.ru/view.php?np=fea997bb')
-#show()
 
-#f = open('F:\out.html', 'w', encoding='utf-8')
-#f.write(s)
-#f.close()
-#os.chdir('C:\Program Files (x86)\Mozilla Firefox')
-#os.system('firefox.exe F:\out.html')
+dump()
