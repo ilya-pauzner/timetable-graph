@@ -2,7 +2,7 @@ from matplotlib import *
 from pylab import *
 
 from html.parser import *
-from urllib import *
+from urllib.request import *
 from string import *
 from datetime import *
 from time import *
