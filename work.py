@@ -64,19 +64,22 @@ def parse_train(url):
             #print(elem)
             try:
                 dt = datetime.strptime(elem, '%H:%M')
-                ans[-1].append(dt.hour * 60 + dt.minute)
+                ans[-1].append(dt)#(dt.hour * 60 + dt.minute)
             except:
-                ans.pop()
-        elif elem[0] == '-':
-            ans.pop()
+                #ans.pop()
+                pass
+        elif elem[0] == '-' or elem == 'Нетданных':
+            # ans.pop()
+            pass
         else:
             ans.append([elem])
     answer1 = list()
     answer2 = list()
     for elem in ans:
         if elem[0] in rail:
-            answer2.append(rail[elem[0]])
-            answer1.append(elem[1])
+            if len(elem) > 1:
+              answer2.append(rail[elem[0]])
+              answer1.append(elem[1])
     parser.close()
     # print((answer1, answer2))
     if (answer1, answer2) != ([], []):
@@ -120,7 +123,12 @@ for elem in mp.s:
     i += 1
     if i % 10 == 0:
         print(i // 10)
+        break
 
 print(j, 'exceptions')
 dump()
+ax = gca()
+for station in rail:
+    ax.axhline(y=rail[station], label=station)
+legend()
 show()
